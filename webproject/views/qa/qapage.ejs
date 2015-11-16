@@ -1,0 +1,26 @@
+<%- include ../header.ejs %>
+
+	
+<!--<%= faculty.length %>-->
+ <form action="/qahome" method="post" >	
+
+ 	<label>Select Program:</label>		
+	<select name="programs">
+		<%for(i=0;i< faculty.length;i++){%>					
+		  <option value='<%= faculty[i].program_name %>'><%= faculty[i].program_name%></option>
+		<%}%>	  
+	</select>
+	<label>Select Year:</label>
+	<select name="years">
+	  <option value="2014">2014</option>
+	  <option value="2015">2015</option>
+	  <option value="2016">2016</option>
+	  <option value="2017">2017</option>
+	</select>
+
+	<input type="submit" class="btnLogin" value="Search" tabindex="1">
+ </form>
+ 
+
+	
+<%- include ../footer.ejs %>

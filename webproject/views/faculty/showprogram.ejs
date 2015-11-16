@@ -1,0 +1,64 @@
+<%- include ../header_table.ejs %>
+	
+	<% if(program != null){%>
+		<div class="datagrid">
+			<strong>Semester 1/Academic Year</strong>: <%= program.academic_year %><br>
+				<table name ="semes1">
+					<thead>
+						<tr>
+							<th>Code</th>
+							<th>Subject</th>
+							<th>Credits</th>
+							<th>Lecturers</th>
+						</tr>
+					</thead>
+					<tbody>
+					<!--{% if trackresults %}-->
+					     <% var i,j;
+							for(i=0;i< program.subject.length;i++){%>								
+								<tr>								   
+								   <% if(program.subject[i].sub_semes==1) {%>
+								   <td><%= program.subject[i].sub_code %></td>
+								   <td><%= program.subject[i].sub_name %></td>
+								   <td><%= program.subject[i].sub_credit %></td>
+								   <td><%= program.subject[i].sub_lecter %></td>
+								   <%}%>
+								</tr>
+							<%}%>
+							
+						<!--{% endfor %}-->
+					</tbody>
+				</table>
+				<strong>Semester 2/Academic Year</strong>: <%= program.academic_year %><br>
+				<table name ="semes2">
+						<thead>
+							<tr>
+								<th>Code</th>
+								<th>Subject</th>
+								<th>Credits</th>
+								<th>Lecturers</th>
+							</tr>
+						</thead>
+						<tbody>
+						<!--{% if trackresults %}-->
+						     <% var i,j;
+								for(i=0;i< program.subject.length;i++){%>								
+									<tr>								   
+									   <% if(program.subject[i].sub_semes==2) {%>
+									   <td><%= program.subject[i].sub_code %></td>
+									   <td><%= program.subject[i].sub_name %></td>
+									   <td><%= program.subject[i].sub_credit %></td>
+									   <td><%= program.subject[i].sub_lecter %></td>
+									   <%}%>
+									</tr>
+								<%}%>
+							
+							<!--{% endfor %}-->
+						</tbody>
+					</table>
+				
+			</div>
+	<%}else{%>
+		<strong>No program</strong> 
+	<%} %>			
+<%- include ../footer.ejs %>
