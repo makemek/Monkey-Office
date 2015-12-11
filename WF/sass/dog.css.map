@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAGA,SAAS;EACR,SAAS,EAJI,IAAI;;AAOlB,SAAS;EACR,SAAS,EARI,IAAI",
+"sources": ["test.scss"],
+"names": [],
+"file": "dog.css"
+}
