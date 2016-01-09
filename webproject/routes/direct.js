@@ -1,9 +1,27 @@
+ 	// =====================================
+    // Setting Model Databases ========
+    // =====================================
 var User  = require('../model/user');
 var Work  = require('../model/works');
 var Fac   = require('../model/faculty');
+var Subject = require('../model/subject');
+var TemplateWorkflow 	= require('../model/TemplateWorkflow');
+//var Handler		= require('./handler');
 var path = require('path');
 var fs = require('fs');
+var exphbs = require('express3-handlebars');
 //var busboy = require('connect-busboy');
+
+ 	// =====================================
+    // Setting Workflow ========
+    // =====================================
+var parseString 		= require('xml2js').parseString;
+var WorkflowHandler		= require('./WorkflowHandler');
+var years = [2012,2013,2014,2015,2016];
+
+var date = new Date();
+var current_year = date.getFullYear();
+
 
 module.exports = function(app, passport) {
 
@@ -11,7 +29,8 @@ module.exports = function(app, passport) {
     // HOME PAGE (with login links) ========
     // =====================================
     app.get('/', function(req, res) {
-        res.render('signin.ejs'); // load the sigin.ejs file
+    	//res.render('signin.ejs');
+        res.render('signin.hbs',{layout:"main"}); // load the sigin.ejs file
     });
 	
 	// Get path images
@@ -21,6 +40,15 @@ module.exports = function(app, passport) {
 	});
 	app.get('/imagelogo.jpg', function (req, res) {
     		res.sendfile(path.resolve('public/images/monkey.jpg'));
+	});
+	app.get('/db.jpg', function (req, res) {
+    		res.sendfile(path.resolve('public/images/db.jpg'));
+	});
+	app.get('/qa.jpg', function (req, res) {
+    		res.sendfile(path.resolve('public/images/qa.jpg'));
+	});
+	app.get('/wf.jpg', function (req, res) {
+    		res.sendfile(path.resolve('public/images/wf.jpg'));
 	});
 	
     // =====================================
@@ -42,6 +70,15 @@ module.exports = function(app, passport) {
 		
 		
     }));
+    // =====================================
+    // LOGOUT ==============================
+    // =====================================
+    app.get('/logout', function(req, res) {
+		console.log("Get logout");
+        req.logout();
+        res.redirect('/');
+    });
+	
 
 
     // =====================================
@@ -65,25 +102,55 @@ module.exports = function(app, passport) {
     // =====================================
        app.get('/home', isLoggedIn, function(req, res) {
 		console.log("Get home");
-        res.render('home.ejs', {
-            user : req.user // get the user out of session and pass to template
-        });
+		res.render('home.hbs',{
+			layout:"homeMain",
+			user : req.user
+		});
+       // res.render('home.ejs', {
+       //      user : req.user // get the user out of session and pass to template
+       //  });
     });
-    // =====================================
+      // =====================================
     // PROFILE SECTION =====================
     // =====================================
     app.get('/profile', isLoggedIn, function(req, res) {
 		console.log("Get profile");
-        res.render('profile/userprofile.ejs', {
-            user : req.user // get the user out of session and pass to template
-        });
+		console.log(req.user.local.name);
+		var name = req.user.local.name;
+		var fac;
+		if(name == "admin")
+			fac = true;
+		else
+			fac = false;
+		res.render('profile/userprofile.hbs',{
+			layout:"profileMain",
+			user : req.user,
+			fac : fac
+		});
+        // res.render('profile/userprofile.ejs', {
+        //     user : req.user // get the user out of session and pass to template
+        // });
     });
+    // =====================================
+    // Get User Info. ==============================
+    // =====================================
+	app.get('/profile_inf',isLoggedIn,function(req,res){
+		console.log("Get profile information");		
+		res.render('profile/profileinfo.hbs',{
+			layout:"profileMain",
+			user : req.user
+
+		});
+		
+	});
+    
 	// =====================================
     // Edit Profile ========
     // =====================================
 		app.get('/edit', isLoggedIn, function(req, res) {
 			console.log( "Get editprofile");
-			res.render('profile/edit.ejs', {
+			res.render('profile/edit.hbs', {
+				layout: "profileMain",
 				user : req.user
 			});
 		});
@@ -139,128 +206,25 @@ module.exports = function(app, passport) {
 			});
 			
   		});
-    // =====================================
-    // LOGOUT ==============================
-    // =====================================
-    app.get('/logout', function(req, res) {
-		console.log("Get logout");
-        req.logout();
-        res.redirect('/');
-    });
-	
-	// =====================================
-    // Get User Info. ==============================
-    // =====================================
-	app.get('/profile_inf',isLoggedIn,function(req,res){
-		console.log("Get profile information");
-		console.log( "Get Profile info");
-		res.render('profile/profileinfo.ejs', {
-            user : req.user // get the user out of session and pass to template
-			
-        });
-	});
-	//=====================================
-    // Get QA Info. ==============================
-    // =====================================
-    app.get('/qapage',isLoggedIn,function(req,res){
-		console.log( "Post QAPage(select year)");
-		return Fac.find( function( err, faculty ) {
-        if( !err ) {
-			console.log(faculty);
-            res.render('qa/qapage.ejs', {
-			  user : req.user,
-              faculty: faculty
-            });
-        } else {
-            return console.log( err+"mhaieiei" );
-	        }
-	    });
-	});
-	
-	app.post('/qahome',isLoggedIn,function(req,res){
-		console.log( "Post QAHOME");
-		console.log(req.body.programs);
-		console.log(req.body.years);
-		res.render('qa/qahome.ejs', {
-            user : req.user, // get the user out of session and pass to template	
-            programname :req.body.programs,
-            year : req.body.years	
-
-        });
-	});
-	app.get('/tqfhome',isLoggedIn,function(req,res){
-		console.log( "Get TQFHOME");
-		program = req.query.program;
-		year = req.query.year;
-		console.log(program);
-		console.log(year);
-		res.render('qa/tqfhome.ejs', {
-            user : req.user, // get the user out of session and pass to template	
-           	programname : program,
-            year : year	
-        });
-	});
-	app.get( '/tqf21',isLoggedIn, function( req, res ) {
-		console.log( "Get TQF21");
-		program = req.query.program;
-		year = req.query.year;
-		console.log(program);
-		console.log(year);
-		//find user in their programs
-		return User.find({'local.faculty' : req.query.program }, function( err, clients ) {
-        if( !err ) {
-			console.log( "What happend here" );
-			console.log(clients);
-            res.render('qa/tqf21.ejs', {
-			  user : req.user,
-              clients: clients
-            });
-        } else {
-            return console.log( err+"mhaieiei" );
-	        }
-	    });
-	});
-	app.get( '/tqf22',isLoggedIn, function( req, res ) {
-		console.log( "Get TQF22");
-		program = req.query.program;
-		year = req.query.year;
-		console.log(program);
-		
-		return Fac.findOne({
-	     $and: [
-	            { 'program_name' : program },
-	            { 'academic_year' : year }
-	          ]
-	   }, function( err, programs ) {
-        if( !err ) {
-        	console.log(programs);
-			console.log( "What happend here" );
-            res.render('qa/tqf22.ejs', {
-			  user : req.user,
-              program: programs
-            });
-        } else {
-        	//res.redirect('/fachome');
-            return console.log( err+"mhaieiei" );
-	        }
-	    });
-	 
-	});
-		
-	
 	//=====================================
     // Get Education Info. ==============================
     // =====================================
 	app.get('/education_inf',isLoggedIn,function(req,res){
 		console.log("Get education");
-		res.render('profile/educationinfo.ejs', {
-            user : req.user // get the user out of session and pass to template			
+		console.log(req.user);
+		res.render('profile/educationinfo.hbs', {
+			layout: "profileMain",
+            user : req.user, // get the user out of session and pass to template
+            helpers: {
+            inc: function (value) { return parseInt(value) + 1; }
+        }			
         });
 	});
 	//add education_inf
 	app.get('/addedu',isLoggedIn,function(req,res){
 		console.log("Add Education");
-		res.render('profile/addeducation.ejs', {
+		res.render('profile/addeducation.hbs', {
+			layout: "profileMain",
             user : req.user // get the user out of session and pass to template			
         });
 	});
@@ -302,16 +266,15 @@ module.exports = function(app, passport) {
 		
 	});
 	//edit education information.
-	app.get('/editedu',isLoggedIn,function(req,res){
+	app.get('/editeducation',isLoggedIn,function(req,res){
+		var index =req.query.id;
 		console.log("Get Edit education");
-		var i = 0;
 		console.log(req.query.id);
-		console.log(req.query.index);
-		console.log(req.query.email);
-		console.log(i);		
-		res.render('profle/editedu.ejs', {
+		res.render('profile/editedu.hbs', {
+			layout: "profileMain",
             user : req.user, // get the user out of session and pass to template
-			index : req.query.id
+			index : req.query.id,
+			education : req.user.education[index]
         });
 	});
 	app.post('/editedu',isLoggedIn,function(req,res){
@@ -352,114 +315,292 @@ module.exports = function(app, passport) {
 		
 		
 	});
-	//=====================================
-    // Get Work Info. ==============================
+	 // =====================================
+    // Admin SECTION =====================
     // =====================================
-	app.get('/work_inf',isLoggedIn,function(req,res){
-		console.log("Get Work Information");
-		res.render('profle/workinfo.ejs', {
-            user : req.user, // get the user out of session and pass to template		
-			work : req.works
+    app.get('/admin',isLoggedIn,function(req,res){
+		console.log("Get Admin");
+		console.log(current_year);
+		res.render('admin/home.hbs', {
+			layout: "adminMain",
+            user : req.user // get the user out of session and pass to template			
         });
 	});
-	app.get('/addwork',isLoggedIn,function(req,res){
-		console.log("Add Work Information");
-		res.render('profile/addwork.ejs', {
-            user : req.user, // get the user out of session and pass to template	
-			work : req.works
-        });
-	});
-	app.post('/addwork',function(req,res){
-		console.log("Add work......");
-		//simple json record
-		//var document = {idUser: req.query.id};
-		//console.log(req.body.name);
-		//console.log(document);
-		//insert record
-		/*Fac.findOne({ 'program_name' :  req.body.name }, function(err, fac) {
-            // if there are any errors, return the error
-            if (err){
-				console.log("Error ...1");
-			}
-            // check to see if theres already a user with that email
-            if (fac) {
-				console.log("That fac is already have");
-            } else {
-                // if there is no user with that email
-                // create the user
-                var newFac  = new Fac();
-                // set the user's local credentials
-				newFac.program_name = req.body.name;
-				newFac.program_year = req.body.year;
-               	newFac.subject = array;	
-                // save the user
-                newFac.save(function(err,user) {
-                    if (err){console.log('mhaiiiiiii');}
-                    else console.log("Insert already"+user);
-                });
-            }
-
-        });  */
-		Work.update({ 'nameUser' : req.query.email },
-		{
-		 "$push" : {
-			"works_assigned_from_teachingAgency" :  {
-			
-					 "nameOfWork": req.body.namework,
-					 "detailsOfWork": req.body.details,
-					
-				   } //inserted data is the object to be inserted 
-			  }
-			},{safe:true},
-			  function (err, user) {
-				if (err){console.log('mhaiiiiiii');}
-			    else console.log("Update already"+user);
-		});
-		res.redirect('/work_inf');
-		
-	
-	});
-	
-	
-	//=====================================
-    // Get Course Info. ==============================
-    // =====================================
-	app.get('/course_inf',function(req,res){
-		res.render('profile_inf.ejs', { message: req.flash('profile') });
-	});
-	
-	//=====================================
-    // Get Faculty Info(only admin). ==============================
-    // =====================================
-	app.get('/fachome',isLoggedIn,function(req,res){
-		console.log("Get Faculty");
+	app.get('/programs',isLoggedIn,function(req,res){
+		console.log('Admin Get Program');
+		console.log(years);
+		console.log(years[0]);
 		return Fac.find( function( err, faculty ) {
         if( !err ) {
 			console.log(faculty);
-            res.render('faculty/faculty.ejs', {
-			  user : req.user,
-              faculty: faculty
+            res.render("admin/faculty/program.hbs", {
+            	layout: "adminMain",
+            	user : req.user,
+            	faculty: faculty,
+            	year : years
             });
         } else {
             return console.log( err+"mhaieiei" );
 	        }
 	    });
+		
+		
+	});
+
+	app.get('/addheadprogram',isLoggedIn,function(req,res){
+		console.log("Admin Add Head program");
+		res.render('admin/faculty/addheadprogram.hbs',{
+			layout: "adminMain",
+			user: req.user
+		});
+	});
+
+	app.post('/addheadprogram',isLoggedIn,function(req,res){
+		console.log("Admin Post add head program");
+		console.log(req.body.program_head_name);
+		console.log(req.body.sub_program);
+		Fac.update({ 'fac_name' : "International College" },
+		{
+		 "$push" : {
+			"program" :  {
+					 "name_head_program" : req.body.program_head_name,
+					 "sub_program" : req.body.sub_program
+				   } //inserted data is the object to be inserted 
+			  }
+			},{safe:true},
+			  function (err, program) {
+				if (err){console.log('mhaiiiiiii');}
+			    else console.log(program);
+		});
+		res.redirect('/programs');
+
+	})
+
+	app.get('/addprogram',isLoggedIn,function(req,res){
+		console.log('Admin add Program');
+		console.log(req.body.years);
+		return Fac.find( function( err, faculty ) {
+        if( !err ) {
+			console.log(faculty);
+            res.render("admin/faculty/addprogram.hbs", {
+            	layout: "adminMain",
+            	user : req.user,
+            	faculty: faculty,
+            	year : years,
+            	cryear : current_year,
+            	helpers: {
+            		test: function () { return faculty; }}
+            });
+        } else {
+            return console.log( err+"mhaieiei" );
+	        }
+	    })
+
+	});
+
+	app.post('/addprogram',isLoggedIn,function(req,res){
+		console.log("Posttt Add Program");
+		console.log(req.body.sub_program);
+		console.log(req.body.program_name);
+		console.log(req.body.program_years);
+		console.log(req.body.subject_code);
+		// Fac.findOne({ 'fac_name' :  "International" }, function(err, sub) {
+            
+  //           if (err){
+		// 		console.log("Error ...1");
+		// 	}
+  //           // check to see if theres already a user with that email
+  //           if (sub) {
+		// 		console.log("That code is already have");
+  //           } else {
+  //               // if there is no user with that email
+  //               // create the user
+  //               var newFac        = new Fac();
+
+  //               // set the user's local credentials
+		// 		newFac.fac_name = "International College";
+				
+  //               // save the user
+  //               newFac.save(function(err,fac) {
+  //                   if (err){console.log('mhaiiiiiii');}
+  //                   else console.log("Insert already"+fac);
+  //               });
+  //           }
+
+  //       });  
+
+		Fac.update({ 'fac_name' : "International College" },
+		{
+		 "$push" : {
+			"program" :  {
+					 "sub_program" : req.body.sub_program,
+					 "program_name": req.body.program_name,
+					 "program_year": req.body.program_years,
+					 "academic_year": current_year,
+					 "subject": req.body.subject_code
+				   } //inserted data is the object to be inserted 
+			  }
+			},{safe:true},
+			  function (err, program) {
+				if (err){console.log('mhaiiiiiii');}
+			    else console.log(program);
+		});
+		res.redirect('/programs');
+ 	});
+
+	
+	app.get('/subjects',isLoggedIn,function(req,res){
+		console.log('Admin Get Subject Home');
+		//console.log(years);
+		return Subject.find( function( err, subject ) {
+        if( !err ) {
+			console.log(subject);
+            res.render("admin/faculty/subjecthome.hbs", {
+            	layout: "adminMain",
+            	user : req.user,
+            	subjects: subject,
+            	
+            });
+        } else {
+            return console.log( err+"mhaieiei" );
+	        }
+	    });
+		
+		
+	});
+	app.get('/addsubjects',isLoggedIn,function(req,res){
+		console.log('Admin Get Add Subject');
+		console.log(years);
+		return Fac.find( function( err, faculty ) {
+        if( !err ) {
+			console.log(faculty);
+            res.render("admin/faculty/subject.hbs", {
+            	layout: "adminMain",
+            	user : req.user,
+            	faculty: faculty,
+            	year : years
+            });
+        } else {
+            return console.log( err+"mhaieiei" );
+	        }
+	    });
+		
+		
+	});
+	app.post('/addsubjects',isLoggedIn,function(req,res){
+		console.log("Posttt Add Subject");
+		console.log(req.body.sub_code);
+		console.log(req.body.lec_name);
+		Subject.findOne({ 'sub_code' :  req.body.sub_code }, function(err, sub) {
+            
+            if (err){
+				console.log("Error ...1");
+			}
+            // check to see if theres already a user with that email
+            if (sub) {
+				console.log("That code is already have");
+            } else {
+                // if there is no user with that email
+                // create the user
+                var newSub        = new Subject();
+
+                // set the user's local credentials
+				newSub.sub_code = req.body.sub_code;
+				newSub.sub_name = req.body.sub_name;
+				newSub.sub_credit = req.body.sub_credit;
+               	newSub.sub_lecter = req.body.lec_name;	
+                // save the user
+                newSub.save(function(err,subject) {
+                    if (err){console.log('mhaiiiiiii');}
+                    else console.log("Insert already"+subject);
+                });
+            }
+
+        });  
+ 		res.redirect('/subjects');
+ 	});
+
+ 		//delete subject information.
+	app.get('/delsub',isLoggedIn,function(req,res){
+		console.log("Delete Subject");
+		console.log(req.query.id);
+		//console.log(req.query.email);
+
+		Subject.remove(
+		      { 'sub_code' : req.query.id },
+		      function(err, results) {
+		        if (err){console.log('mhaiiiiiii');}
+		 	    else console.log(results);
+		      }
+		   );
+		res.redirect('/subjects');
+
+		// Subject.update({ 'sub_code' : req.query.id },
+		// {
+		//  "$unset" : {"sub_code": req.query.id},				  
+		// 	},{safe:true},
+		// 	  function (err, user) {
+		// 		if (err){console.log('mhaiiiiiii');}
+		// 	    else console.log(user);
+		// });
+		// res.redirect('/subjects');
+		
+		
+	});
+		//edit education information.
+	app.get('/editsubject',isLoggedIn,function(req,res){
+		var index =req.query.id;
+		console.log("Admin Edit subject");
+		console.log(req.query.id);
+
+		return Subject.findOne({'sub_code' : req.query.id }, function( err, subject ) {
+        if( !err ) {
+			console.log(subject);
+            res.render('admin/faculty/editsubject.hbs', {
+              layout: "adminMain",
+			  user : req.user,
+              subject: subject,
+              helpers: {
+            	inc: function (value) { return parseInt(value) + 1; }
+            }
+            });
+        } else {
+            return console.log( err+"mhaieiei" );
+	        }
+	    });	
 	});
 	
-	app.get('/addprogram',isLoggedIn,function(req,res){
-		console.log("Add Program");
-		res.render('faculty/addprogram.ejs', {
-            user : req.user // get the user out of session and pass to template	
-			//fac : req.faculty //get faculty information
-        });
+	app.post('/editsubjects',isLoggedIn,function(req,res){
+		console.log("Admin Edit subject");
+		//console.log(req.query.id);
+		//user : req.user		
+		Subject.findOne({'sub_code' :  req.body.sub_code },
+			function(err, sub) {
+				if (err){ 
+					console.log("Upload Failed!");
+					return done(err);}				
+				if (sub){
+					console.log(sub);
+					sub.editSubject(req, res)						
+				}
+
+			});
 	});
+
+	//=====================================
+    // Get Faculty Info(only admin). ==============================
+    // =====================================
+
+	
+
 	app.post('/addprogram',function(req,res){
-		console.log("Post Add work......");
+		console.log("Post Add program......");
 		//simple json record
 		//var document = {idUser: req.query.id};
 		var i = 0;
 		//var str = 'req.body.array'+i;
 		console.log(req.body.name);
+
 		//console.log(str);
 		var arraysub = [];
 		var array = req.body.array;
@@ -540,6 +681,309 @@ module.exports = function(app, passport) {
 	        }
 	    });
 	 });
+
+
+	//=====================================
+    // Get QA Info. ==============================
+    // =====================================
+    app.get('/qapage',isLoggedIn,function(req,res){
+		console.log( "Post QAPage(select year)");
+		return Fac.find( function( err, faculty ) {
+        if( !err ) {
+			console.log(faculty);
+            res.render('qa/qapage.ejs', {
+			  user : req.user,
+              faculty: faculty
+            });
+        } else {
+            return console.log( err+"mhaieiei" );
+	        }
+	    });
+	});
+	
+	app.post('/qahome',isLoggedIn,function(req,res){
+		console.log( "Post QAHOME");
+		console.log(req.body.programs);
+		console.log(req.body.years);
+		res.render('qa/qahome.ejs', {
+            user : req.user, // get the user out of session and pass to template	
+            programname :req.body.programs,
+            year : req.body.years	
+
+        });
+	});
+	app.get('/tqfhome',isLoggedIn,function(req,res){
+		console.log( "Get TQFHOME");
+		program = req.query.program;
+		year = req.query.year;
+		console.log(program);
+		console.log(year);
+		res.render('qa/tqfhome.ejs', {
+            user : req.user, // get the user out of session and pass to template	
+           	programname : program,
+            year : year	
+        });
+	});
+	app.get( '/tqf21',isLoggedIn, function( req, res ) {
+		console.log( "Get TQF21");
+		program = req.query.program;
+		year = req.query.year;
+		console.log(program);
+		console.log(year);
+		//find user in their programs
+		return User.find({'local.faculty' : req.query.program }, function( err, clients ) {
+        if( !err ) {
+			console.log( "What happend here" );
+			console.log(clients);
+            res.render('qa/tqf21.ejs', {
+			  user : req.user,
+              clients: clients,
+              programname: program,
+              year: year
+            });
+        } else {
+            return console.log( err+"mhaieiei" );
+	        }
+	    });
+	});
+	app.get( '/tqf22',isLoggedIn, function( req, res ) {
+		console.log( "Get TQF22");
+		program = req.query.program;
+		year = req.query.year;
+		console.log(program);
+		
+		return Fac.findOne({
+	     $and: [
+	            { 'program_name' : program },
+	            { 'academic_year' : year }
+	          ]
+	   }, function( err, programs ) {
+        if( !err ) {
+        	console.log(programs);
+			console.log( "What happend here" );
+            res.render('qa/tqf22.ejs', {
+			  user : req.user,
+              program: programs,
+              programname: program,
+              year: year
+
+            });
+        } else {
+        	//res.redirect('/fachome');
+            return console.log( err+"mhaieiei" );
+	        }
+	    });
+	 
+	});
+		
+	
+	
+	//=====================================
+    // Get Work Info. ==============================
+    // =====================================
+	app.get('/work_inf',isLoggedIn,function(req,res){
+		console.log("Get Work Information");
+		res.render('profile/workinfo.ejs', {
+            user : req.user, // get the user out of session and pass to template		
+			//work : req.works
+        });
+	});
+	app.get('/addwork',isLoggedIn,function(req,res){
+		console.log("Add Work Information");
+		res.render('profile/addwork.ejs', {
+            user : req.user, // get the user out of session and pass to template	
+			work : req.works
+        });
+	});
+	app.post('/addwork',function(req,res){
+		console.log("Add work......");
+		//simple json record
+		//var document = {idUser: req.query.id};
+		//console.log(req.body.name);
+		//console.log(document);
+		//insert record
+		/*Fac.findOne({ 'program_name' :  req.body.name }, function(err, fac) {
+            // if there are any errors, return the error
+            if (err){
+				console.log("Error ...1");
+			}
+            // check to see if theres already a user with that email
+            if (fac) {
+				console.log("That fac is already have");
+            } else {
+                // if there is no user with that email
+                // create the user
+                var newFac  = new Fac();
+                // set the user's local credentials
+				newFac.program_name = req.body.name;
+				newFac.program_year = req.body.year;
+               	newFac.subject = array;	
+                // save the user
+                newFac.save(function(err,user) {
+                    if (err){console.log('mhaiiiiiii');}
+                    else console.log("Insert already"+user);
+                });
+            }
+
+        });  */
+		console.log(req.body.namework);
+		console.log(req.body.details);
+		var test = {
+		    foo: "here be dragons",
+		    bar: "foo is a lie"
+		  };
+		var array = {"nameofwork":"thesis2","detail":"thesis year"};
+		//use JSON.stringify to convert it to json string
+        var jsonstring = JSON.stringify(array);
+        //convert json string to json object using JSON.parse function
+        var jsonobject = JSON.parse(jsonstring);
+		test = ["thesis","a","bb"];
+		temp = "rhw";
+		//test = JSON.parse(array);
+		//console.log(test);
+		/*PSchema.find({},function(err,docs){
+			docs.forEach(function(doc){
+			if(doc.array.indexOf("hello2") == -1)
+			{
+			    doc.array.push("hello2");
+			    doc.save(function (err) {
+			        if(err) {
+			            //error
+			        }
+			    });
+			}
+			})
+			})*/
+		/*Work.findOne({'nameUser' : req.query.email },function(err,docs){
+				console.log(docs);
+			    docs.push(test);
+			    docs.save(function (err,user) {
+			        if (err){console.log('mhaiiiiiii'+err);}
+			    	else console.log(user);
+			    });
+			
+			});
+
+			"details": req.body.details*/
+		var i = 0;
+		changes = { };
+		changes["work."+i]= req.body.namework;
+		changes["work."+i]= req.body.details;
+		console.log(changes);
+		Work.update({ 'nameUser' : req.query.email },
+		{
+			$push : changes			  
+			},{safe:true},
+			  function (err, user) {
+				if (err){console.log('mhaiiiiiii'+err);}
+			    else console.log(user);
+		});
+			
+		res.redirect('/work_inf');
+		
+	
+	});
+	
+	
+	//=====================================
+    // Get Course Info. ==============================
+    // =====================================
+	app.get('/course_inf',function(req,res){
+		res.render('profile_inf.ejs', { message: req.flash('profile') });
+	});
+	
+	
+	//=====================================
+	// Workflow. ==============================
+	// =====================================
+	app.get('/workflow', function(req, res){
+		res.render('wf/index.hbs',{
+			layout:"workflowMain"
+		});
+	});
+
+	app.get('/execute', function(req, res){
+	TemplateWorkflow.find({}, function(err, result){
+
+		if(err) console.log(err);
+
+		res.render('wf/execute.hbs', 
+			{ layout: "workflowMain",workflows : result });
+		});
+
+	});
+
+	app.get('/create', function(req, res){
+		res.render('wf/create.hbs',
+			{layout:"workflowMain"});
+	});
+
+	app.post('/save', function(req, res){
+
+		var tpWorkflow = new TemplateWorkflow( { 
+			name: req.body.name, 
+			description: req.body.description,
+			xml: req.body.xml  
+		} );
+	
+		tpWorkflow.save(function (err) {
+			if(!err){
+				console.log('Save template workflow !!!');
+				res.end('succesful');
+			}
+			else{
+				console.log(err);
+				res.end('failed');
+				}
+
+		});
+	});
+
+
+	app.get('/:id/profile', function(req, res){
+		
+		TemplateWorkflow.findOne( { "_id" : req.params.id }, function(err, result){
+
+			res.render('wf/single/profile.hbs', 
+				{ layout:"workflowMain",workflow: result } );
+		});	
+
+	});
+
+
+	app.get('/:id/execute', function(req, res){
+
+		TemplateWorkflow.findOne( { "_id" : req.params.id }, function(err, result){
+			var xml = result.xml;
+
+			parseString(xml, function (err, strResult) {
+
+				var elements = strResult["bpmn2:definitions"]["bpmn2:process"][0];
+				var keys = Object.keys( elements );
+
+
+				var handler = new WorkflowHandler();
+
+			
+				handler.setup( elements );
+				handler.run();
+		
+	    		res.render( "workflow/single/execute.hbs", { 
+	    			layout:"workflowMain",
+	    			tasks : handler.taskList,
+	    			id : req.params.id
+	    		});
+			});
+		});
+	});
+
+
+	app.post('/:id/execute', function(req, res){
+
+		res.end("DONE");
+
+	});
+
 };
 
 // route middleware to make sure a user is logged in
@@ -551,4 +995,12 @@ function isLoggedIn(req, res, next) {
 
     // if they aren't redirect them to the home page
     res.redirect('/');
+}
+//route middleware to make sure user is logged in as Admin
+function isAdmin(req,res,next){
+
+	if(req.user.local.name == "admin")
+		return next();
+
+	res.redirect('/');
 }

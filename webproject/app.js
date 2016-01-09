@@ -1,6 +1,6 @@
 var express = require('express');
-var path = require('path');
-var	fs = require('fs');
+var path = require('path'); //path 
+var	fs = require('fs'); //file
 var busboy = require('connect-busboy');
 //var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -8,11 +8,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 //Add new
-var mongoose = require('mongoose');
+var mongoose = require('mongoose');  //database
 var passport = require('passport');
 var flash = require('connect-flash');
 var morgan = require('morgan');
 var session = require('express-session');
+var exphbs = require('express3-handlebars');  //handle bars
+
 
 var configDB = require('./config/database.js');
 mongoose.connect('mongodb://localhost:27017/nodewebapp');//connect to our database
@@ -20,12 +22,18 @@ require('./config/passport')(passport); // pass passport for configuration
 //var routes = require('./routes/index');
 //var users = require('./routes/users');
 
+
+
+
+
 var app = express();
 //app.set('port',3000);
 // view engine setup
 
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');//set up ejs for templating
+//app.engine('handlebars', exphbs( {defaultLayout: 'main'} ) );
+app.engine('hbs', exphbs({extname:'hbs', defaultLayout:'main.hbs'}));
+app.set('view engine', 'hbs');//set up hbs for templating
 
 // set up our express application
 //app.use(session({secret:'mhai_fat'}));

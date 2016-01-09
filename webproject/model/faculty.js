@@ -1,23 +1,16 @@
-// app/models/user.js
+// app/models/faculty.js
 // load the things we need
 var mongoose = require('mongoose');
 var bcrypt   = require('bcrypt-nodejs');
 
-// define the schema for our user model
+// define the schema for our faculty model
 var facSchema = mongoose.Schema({
 
-    program_name	: String,
-	program_year	: Number,
-	academic_year	: Number,
-	subject		: [{
-		sub_code	: String,
-		sub_name	: String,
-		sub_semes	: Number,
-		sub_lecter	: String,
-		sub_credit	: Number		
-	}],
-	
-
+	fac_name : String,
+	program : [{
+		name_head_program : String,
+		sub_program: [String]			
+	}]
 });
 
 

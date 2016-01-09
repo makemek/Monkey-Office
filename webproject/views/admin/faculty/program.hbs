@@ -1,0 +1,47 @@
+<!-- {{#each faculty}}				
+	{{program_name}}
+	bb
+	mhai_eiei
+{{/each}} 
+
+{{#each year}}	
+	aa	
+	year {{@index}}		
+	{{this}}
+{{/each}}  
+
+{{year}} -->
+<!-- {{faculty}}
+{{#each faculty}}
+	{{#each program}}				
+  		{{program_name}}
+  	{{/each}}
+{{/each}}  
+ -->
+<form action="/showprogram" method="post" >	
+
+ 	<label>Select Program:</label>		
+	<select name="programs">
+		{{#each faculty}}	
+			{{#each program}}			
+		  		<option value="{{ program_name }}">{{ program_name }}</option>
+		  	{{/each}}
+		{{/each}}  
+	</select>
+	<label>Select Year:</label>
+	<select name="years">
+	  {{#each year}}
+	  	<option value = "{{this}}">{{this}}</option>
+	  {{/each}}
+	  <!-- <option value="2014">2014</option>
+	  <option value="2015">2015</option>
+	  <option value="2016">2016</option>
+	  <option value="2017">2017</option> -->
+	</select>
+
+	<input type="submit" class="btnLogin" value="Search" tabindex="1">
+ </form>
+ <br>
+
+<button class="btn btn-default"><a href = "/addheadprogram">ADD Head Programs</button><br/></a>
+<button class="btn btn-default"><a href = "/addprogram">ADD Programs</button><br/></a>
