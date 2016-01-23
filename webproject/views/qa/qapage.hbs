@@ -71,7 +71,7 @@ $(document).ready(function() {
  	{{/each}}
 {{/each}} -->
 
-<form action="/programs" method="post" >	
+<form action="/qahome" method="post" >	
 
 	<label>Select Program:</label>		
  		
@@ -102,7 +102,7 @@ $(document).ready(function() {
 	</select>
 	<br>
 
-	<label>Select Acedamic Year:</label>
+	<label>Select Year:</label>
 	<select name="years">
 	  {{#each year}}
 	  	<option value = "{{this}}">{{this}}</option>
@@ -117,4 +117,3 @@ $(document).ready(function() {
  </form>
  <br>
 
-<button class="btn btn-default"><a href = "/addprogram">ADD Programs</button><br/></a>

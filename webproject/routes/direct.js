@@ -5,6 +5,8 @@ var User  = require('../model/user');
 var Work  = require('../model/works');
 var Fac   = require('../model/faculty');
 var Subject = require('../model/subject');
+var Acyear = require('../model/academic_year');
+var Teach = require('../model/teaching_semester');
 var TemplateWorkflow 	= require('../model/TemplateWorkflow');
 //var Handler		= require('./handler');
 var path = require('path');
@@ -18,9 +20,12 @@ var exphbs = require('express3-handlebars');
 var parseString 		= require('xml2js').parseString;
 var WorkflowHandler		= require('./WorkflowHandler');
 var years = [2012,2013,2014,2015,2016];
+var yearlevel = [1,2,3,4];
 
 var date = new Date();
 var current_year = date.getFullYear();
+var index = 0;
+var nametemp = "";
 
 
 module.exports = function(app, passport) {
@@ -337,7 +342,12 @@ module.exports = function(app, passport) {
             	layout: "adminMain",
             	user : req.user,
             	faculty: faculty,
-            	year : years
+            	year : years,
+            	helpers: {
+            	set: function (value) { index = value; },
+            	get: function(){return index;},
+            
+            }
             });
         } else {
             return console.log( err+"mhaieiei" );
@@ -346,19 +356,139 @@ module.exports = function(app, passport) {
 		
 		
 	});
+	app.post('/programs',isLoggedIn,function(req,res){
+		console.log("Admin Post Program");
+		console.log(req.body.sub_programs);
+		console.log(req.body.years);
+		Acyear.findOne({ 
+			$and: [
+		             { 'program_name' :  req.body.sub_programs  },
+		             { 'academic_year' : req.body.years }
+		           ]
+			
+		}, function(err, ac) {
+        
+        if (err){
+			console.log("Error ...1");
+		}
+        // check to see if theres already a user with that email
+        if (ac) {
+			console.log("There have table(s) to show");
+			console.log(ac.id);
+			res.redirect('/showprogram?id='+ac.id);
+			// res.render('admin/faculty/searchprogram.hbs',{
+			// 	layout: "adminMain",
+			// 	user: req.user,
+			// 	program : req.body.sub_programs,
+			// 	acid : ac.id,
+			// 	year : req.body.years
+				
+			// 	});
+			// });
+        } else {
+           console.log("There not have table to show");
+       	   res.redirect('/showprogram');
+       	 }
+       	});
+	
+  });
+    
+    app.get('/showprogram',isLoggedIn,function(req,res){
+    	console.log("Admin get showprogram");
+    	console.log(req.query.id);
+    	return Teach.find({'ac_id' : req.query.id }, function( err, teachsemes ) {
+        if( !err ) {
+			console.log(teachsemes);
+            res.render("admin/faculty/searchprogram.hbs", {
+            	layout: "adminMain",
+            	user : req.user,
+            	teachsemes: teachsemes,
+            	year : years,
+            	helpers: {
+            	set: function (value) { index = value; },
+            	get: function(){return index;},
+            
+            }
+            });
+        } else {
+            return console.log( err+"mhaieiei" );
+	        }
+	    });
 
-	app.get('/addheadprogram',isLoggedIn,function(req,res){
+    });
+
+	app.post('/showprogram',isLoggedIn,function(req,res){
+	console.log("Post show program");
+	console.log(req.body.sub_programs);
+	console.log(req.body.years);
+	console.log(req.query.acid);	
+
+		
+ 	});
+	// return Fac.findOne({
+	//      $and: [
+	//             { 'program_name' : req.body.programs },
+	//             { 'academic_year' : req.body.years }
+	//           ]
+	//    }, function( err, programs ) {
+	//     if( !err ) {
+	//     	console.log(programs);
+	// 		console.log( "What happend here" );
+	//         res.render('faculty/showprogram.ejs', {
+	// 		  user : req.user,
+	//           program: programs
+	//         });
+	//     } else {
+	//     	//res.redirect('/fachome');
+	//         return console.log( err+"mhaieiei" );
+	//         }
+	//     });
+	//  });
+
+	app.get('/addprogram',isLoggedIn,function(req,res){
 		console.log("Admin Add Head program");
-		res.render('admin/faculty/addheadprogram.hbs',{
+		res.render('admin/faculty/addprogram.hbs',{
 			layout: "adminMain",
 			user: req.user
 		});
 	});
 
-	app.post('/addheadprogram',isLoggedIn,function(req,res){
+	app.post('/addprogram',function(req,res){
 		console.log("Admin Post add head program");
 		console.log(req.body.program_head_name);
 		console.log(req.body.sub_program);
+		console.log(req.body.sub_program[0]);
+		var sub_track = req.body.sub_program;
+		console.log(sub_track.length);
+		// Fac.findOne({ 'fac_name' :  "International College" }, function(err, ac) {
+        
+  //       if (err){
+		// 	console.log("Error ...1");
+		// }
+  //       // check to see if theres already a user with that email
+  //       if (ac) {
+		// 	console.log("That code is already have");
+			
+			
+  //       } else {
+  //           // if there is no user with that email
+  //           // create the user
+  //           var newFac        = new Fac();
+
+  //           // set the user's local credentials
+		// 	newFac.fac_name = "International College" ;
+			
+  //           // save the acyear
+  //           newFac.save(function(err,fac) {
+  //           	if (err){console.log('mhaiiiiiii');}
+  //               else{
+  //                console.log("Insert already"+ fac);
+                 	
+  //               }
+  //           });
+  //      	 }
+		// });
+		
 		Fac.update({ 'fac_name' : "International College" },
 		{
 		 "$push" : {
@@ -374,62 +504,127 @@ module.exports = function(app, passport) {
 		});
 		res.redirect('/programs');
 
-	})
+	});
 
-	app.get('/addprogram',isLoggedIn,function(req,res){
+	app.get('/addsubprogram',isLoggedIn,function(req,res){
 		console.log('Admin add Program');
-		console.log(req.body.years);
-		return Fac.find( function( err, faculty ) {
-        if( !err ) {
-			console.log(faculty);
-            res.render("admin/faculty/addprogram.hbs", {
-            	layout: "adminMain",
-            	user : req.user,
-            	faculty: faculty,
-            	year : years,
-            	cryear : current_year,
-            	helpers: {
-            		test: function () { return faculty; }}
-            });
+		console.log(req.query.name);
+		console.log(req.query.year);
+		console.log(yearlevel);
+		Acyear.findOne({ 
+			$and: [
+		             { 'program_name' :  req.query.name  },
+		             { 'academic_year' : req.query.year }
+		           ]
+			
+		}, function(err, ac) {
+        
+        if (err){
+			console.log("Error ...1");
+		}
+        // check to see if theres already a user with that email
+        if (ac) {
+			console.log("That code is already have");
+			res.render("admin/faculty/addsubprogram.hbs",{
+						layout: "adminMain",
+						user: req.user,
+						name: req.query.name,
+						cryear : req.query.year,
+						acid: ac.id,
+						yearlevel : yearlevel
+			});
         } else {
-            return console.log( err+"mhaieiei" );
-	        }
-	    })
+            // if there is no user with that email
+            // create the user
+            var acYear        = new Acyear();
+
+            // set the user's local credentials
+			acYear.academic_year = req.query.year;
+			acYear.program_name = req.query.name;
+			
+            // save the acyear
+            acYear.save(function(err,acc) {
+            	if (err){console.log('mhaiiiiiii');}
+                else{
+                 nametemp = acc.id;
+                 console.log("Insert already"+ nametemp);
+                 	res.render("admin/faculty/addsubprogram.hbs",{
+						layout: "adminMain",
+						user: req.user,
+						name: req.query.name,
+						acid: nametemp,
+						yearlevel : yearlevel
+					});
+                }
+            });
+       	 }
+		});
+		
+		// return Fac.find( function( err, faculty ) {
+  //       if( !err ) {
+		// 	console.log(faculty);
+  //           res.render("admin/faculty/addsubprogram.hbs", {
+  //           	layout: "adminMain",
+  //           	user : req.user,
+  //           	faculty: faculty,
+  //           	year : years,
+  //           	cryear : current_year,
+  //           	helpers: {
+  //           	set: function (value) { index = value; },
+  //           	get: function(){return index;}
+  //           	}
+  //           });
+  //       } else {
+  //           return console.log( err+"mhaieiei" );
+	 //        }
+	 //    })
 
 	});
 
-	app.post('/addprogram',isLoggedIn,function(req,res){
+	app.post('/addsubprogram',isLoggedIn,function(req,res){
 		console.log("Posttt Add Program");
-		console.log(req.body.sub_program);
-		console.log(req.body.program_name);
-		console.log(req.body.program_years);
+		console.log(req.body.nametrack);
+		console.log(req.body.year);
+		console.log(req.body.semes);
+		console.log(req.body.acid);
 		console.log(req.body.subject_code);
-		// Fac.findOne({ 'fac_name' :  "International" }, function(err, sub) {
-            
-  //           if (err){
-		// 		console.log("Error ...1");
-		// 	}
-  //           // check to see if theres already a user with that email
-  //           if (sub) {
-		// 		console.log("That code is already have");
-  //           } else {
-  //               // if there is no user with that email
-  //               // create the user
-  //               var newFac        = new Fac();
+		
+		
+		console.log(nametemp);
+		Teach.findOne({
+		     $and: [
+		             { 'Year' : req.body.year },
+		             { 'semester' : req.body.semes }
+		           ]
+		    }, function(err, sub) {
+            console.log(nametemp);
+            if (err){
+				console.log("Error ...1");
+			}
+            // check to see if theres already a user with that email
+            if (sub) {
+				console.log("That code is already have");
+            } else {
+                // if there is no user with that email
+                // create the user
+                var newTeach        = new Teach();
 
-  //               // set the user's local credentials
-		// 		newFac.fac_name = "International College";
-				
-  //               // save the user
-  //               newFac.save(function(err,fac) {
-  //                   if (err){console.log('mhaiiiiiii');}
-  //                   else console.log("Insert already"+fac);
-  //               });
-  //           }
+                // set the user's local credentials
+				newTeach.ac_id = req.body.acid ;
+				newTeach.Year = req.body.year;
+				newTeach.semester = req.body.semes;
+				newTeach.subject = req.body.subject_code;
+			
+                // save the user
+                newTeach.save(function(err,teach) {
+                    if (err){console.log('mhaiiiiiii');}
+                    else console.log("Insert already"+ teach);
+                });
+            }
 
-  //       });  
+        });  
 
-		Fac.update({ 'fac_name' : "International College" },
+		/*Fac.update({ 'fac_name' : "International College" },
 		{
 		 "$push" : {
 			"program" :  {
@@ -444,7 +639,7 @@ module.exports = function(app, passport) {
 			  function (err, program) {
 				if (err){console.log('mhaiiiiiii');}
 			    else console.log(program);
-		});
+		});*/
 		res.redirect('/programs');
  	});
 
@@ -587,143 +782,85 @@ module.exports = function(app, passport) {
 			});
 	});
 
-	//=====================================
-    // Get Faculty Info(only admin). ==============================
-    // =====================================
-
 	
-
-	app.post('/addprogram',function(req,res){
-		console.log("Post Add program......");
-		//simple json record
-		//var document = {idUser: req.query.id};
-		var i = 0;
-		//var str = 'req.body.array'+i;
-		console.log(req.body.name);
-
-		//console.log(str);
-		var arraysub = [];
-		var array = req.body.array;
-		console.log(array.length);
-		for(i=0; i< array.length; i++){
-			var test = JSON.parse(req.body.array[i])
-			arraysub.push(test);	
-		}
-		console.log(arraysub);
-		//console.log(document);
-		//insert record
-		Fac.findOne({ 'program_name' :  req.body.name }, function(err, fac) {
-            // if there are any errors, return the error
-            if (err){
-				console.log("Error ...1");
-			}
-            // check to see if theres already a user with that email
-            if (fac) {
-				console.log("That fac is already have");
-            } else {
-                // if there is no user with that email
-                // create the user
-                var newFac        = new Fac();
-
-                // set the user's local credentials
-				newFac.program_name = req.body.name;
-				newFac.program_year = req.body.year;
-				newFac.academic_year = req.body.acyear;
-               	newFac.subject = arraysub;	
-                // save the user
-                newFac.save(function(err,user) {
-                    if (err){console.log('mhaiiiiiii');}
-                    else console.log("Insert already"+user);
-                });
-            }
-
-        });  
-		/*Work.update({ 'nameUser' : req.query.email },
-		{
-		 "$push" : {
-			"works_assigned_from_teachingAgency" :  {
-			
-					 "nameOfWork": req.body.namework,
-					 "detailsOfWork": req.body.details,
-					
-				   } //inserted data is the object to be inserted 
-			  }
-			},{safe:true},
-			  function (err, user) {
-				if (err){console.log('mhaiiiiiii');}
-			    else console.log("Update already"+user);
-		});*/
-		res.redirect('/fachome');
-		
-	
-	});
-	
-	app.post('/showprogram',isLoggedIn,function(req,res){
-		console.log("Post show program");
-		console.log(req.body.programs);
-		console.log(req.body.years)
-		return Fac.findOne({
-	     $and: [
-	            { 'program_name' : req.body.programs },
-	            { 'academic_year' : req.body.years }
-	          ]
-	   }, function( err, programs ) {
-        if( !err ) {
-        	console.log(programs);
-			console.log( "What happend here" );
-            res.render('faculty/showprogram.ejs', {
-			  user : req.user,
-              program: programs
-            });
-        } else {
-        	//res.redirect('/fachome');
-            return console.log( err+"mhaieiei" );
-	        }
-	    });
-	 });
-
 
 	//=====================================
     // Get QA Info. ==============================
     // =====================================
-    app.get('/qapage',isLoggedIn,function(req,res){
-		console.log( "Post QAPage(select year)");
+    app.get('/qapage',function(req,res){
+		console.log('Get QA Info(select program)');
+		console.log(years);
+		console.log(years[0]);
 		return Fac.find( function( err, faculty ) {
         if( !err ) {
 			console.log(faculty);
-            res.render('qa/qapage.ejs', {
-			  user : req.user,
-              faculty: faculty
+            res.render("qa/qapage.hbs", {
+            	layout: "homeMain",
+            	user : req.user,
+            	faculty: faculty,
+            	year : years,
+            	helpers: {
+            	set: function (value) { index = value; },
+            	get: function(){return index;},
+            
+            }
             });
         } else {
             return console.log( err+"mhaieiei" );
 	        }
 	    });
+		
+		
 	});
-	
-	app.post('/qahome',isLoggedIn,function(req,res){
-		console.log( "Post QAHOME");
-		console.log(req.body.programs);
-		console.log(req.body.years);
-		res.render('qa/qahome.ejs', {
-            user : req.user, // get the user out of session and pass to template	
-            programname :req.body.programs,
-            year : req.body.years	
 
-        });
+    app.post('/qahome',function(req,res){
+	console.log('Get QA home(select Topic)');
+	console.log(req.body.sub_programs);
+	console.log(req.body.years);
+	res.render('qa/qahome.hbs',{
+			layout: "homeMain",
+			user: req.user,
+			programname: req.body.sub_programs,
+			year: req.body.years
+		});
+	
+		
 	});
-	app.get('/tqfhome',isLoggedIn,function(req,res){
-		console.log( "Get TQFHOME");
-		program = req.query.program;
-		year = req.query.year;
-		console.log(program);
-		console.log(year);
-		res.render('qa/tqfhome.ejs', {
-            user : req.user, // get the user out of session and pass to template	
-           	programname : program,
-            year : year	
-        });
+
+    app.post('/tqfhome',function(req,res){
+	console.log('Get TQF home(select choice)');
+	console.log(req.query.sub_programs);
+	console.log(req.query.years);
+	res.render('qa/tqfhome.hbs',{
+			layout: "homeMain",
+			user: req.user,
+			programname: req.query.sub_programs,
+			year: req.query.years
+		});		
 	});
+
+    app.get('/tqf21',function(req,res){
+		console.log('Get TQF21');
+		console.log(req.query.program);
+		console.log(req.query.year);
+		return User.find({'local.faculty' : req.query.program }, function( err, clients ){
+        if( !err ) {
+			console.log(clients);
+            res.render("qa/tqf21.hbs", {
+            	layout: "homeMain",
+            	user : req.user,
+            	clients: clients,
+            	programname: program,
+              	year: year
+            });
+        } else {
+            return console.log( err+"mhaieiei" );
+	        }
+	    });
+		
+		
+	});
+		
 	app.get( '/tqf21',isLoggedIn, function( req, res ) {
 		console.log( "Get TQF21");
 		program = req.query.program;

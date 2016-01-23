@@ -1,10 +1,9 @@
-
 <script>
 	console.log(year);
 	function deleteRow(row)
 	{
 	    var i=row.parentNode.parentNode.rowIndex;
-	    document.getElementById('POITable').deleteRow(i);
+	    document.getElementById('programTable').deleteRow(i);
 	}
 
 
@@ -12,7 +11,7 @@
 	{
 		console.log({{year}});
 	    console.log( 'hi');
-	    var x=document.getElementById('POITable');
+	    var x=document.getElementById('programTable');
 	    var new_row = x.rows[1].cloneNode(true);
 	    var len = x.rows.length;
 	    new_row.cells[0].innerHTML = len;
@@ -25,122 +24,44 @@
 	    inp2.value = '';
 	    x.appendChild( new_row );
 	}
-	function eiei(){
-		return "Mhai Eiei";
-	}
 
 </script>
 
 <form action="/addprogram" method="post" id = "myForm" >	
 
-	<!-- <label>{{test 1}}</label> -->
-	<label>Select Sub Program:</label>		
-	<select name="sub_program">
-		{{#each faculty}}	
-			{{#each program}}			
-		  		<option value="{{ program_name }}">{{ program_name }}</option>
-		  	{{/each}}
-		{{/each}}  
-	</select>
-	<br>
-
+	
 	<label>Program name:</label>
-	  <input type="text" tabindex="1" placeholder="Enter program name" name="program_name" required><br>
+	  <input type="text" tabindex="1" placeholder="Enter program name" name="program_head_name" required><br>
 	<br>
 
-	<label>Program year:</label>
-		<select name="program_years">
-		  {{#each year}}
-		  	<option value = "{{this}}">{{this}}</option>
-		  {{/each}}
-		</select>
-	<br>
+	
 
-	<label>Academic year:</label>
-	  <input type="text" tabindex="1" placeholder="{{cryear}}" name="program_acyear"value="{{cryear}}" readonly><br>
-	<!--<label>Academic year:</label>
-	  <input type="text" tabindex="1" placeholder="Enter academic year" name="acyear" required><br>-->
-	<label>Subject:</label><br>
+	<label>Program track:</label><br>
 			<!--table here-->
 	<div class = "datagrid">
-    	<table  id="POITable" >
+    <table  id="programTable" >
 		<thead>
 			<tr>
 				<th>Index</th>
-				<th>Subject code</th>
-				<th>Subject name</th>
-				<th>Subject semester</th>
-				<th>Subject lecturer</th>
-				<th>Subject credits</th>
+				<th>Program</th>
 				<th>Delete</th>
-				<th>Insert</th>							
+								
 			</tr>
 		</thead>
         <tr>
             <td>1</td>
-            <td><input  type="text" id="subject_code" name="subject_code"/></td>
-            <td><input  type="text" id="lngbox" readonly=true/></td>
-               <td><select width="50px" name="semes" id= "sub_semes">
-				  <option value="1">1</option>
-				  <option value="2">2</option>
-				</select>
-			</td>
-            <td><input  type="text" id="lngbox"  readonly=true/></td>
-
-            <td><input  type="text" id="lngbox" readonly=true/></td>
+            <td><input  type="text" name="sub_program" id="latbox"/></td>
             <td><input type="button" id="delPOIbutton" value="Delete" onclick="deleteRow(this)"/></td>
-            <td><input type="button" id="addmorePOIbutton" value="Insert" /></td>
+            
         </tr>
    	</table>
-   	</div></br>
-   	<input type="button" id="addmorePOIbutton" value="Insert Row" onclick="insRow()"/>
-		<!-- <div class="datagrid">
-			<table id = "addTable">
-				<thead>
-					<tr>
-						<th>Subject code</th>
-						<th>Subject name</th>
-						<th>Subject semester</th>
-						<th>Subject lecturer</th>
-						<th>Subject credits</th>
-						<th>Edit</th>
-						<th>Delete</th>							
-					</tr>
-				</thead>
-				<tfoot>
-					<tr><td colspan="4">
-					<div id="paging">
-						<ul><li>
-							<a href="#"><span>Previous</span></a></li>
-							<li><a href="#" class="active"><span>1</span></a></li>
-							<li><a href="#"><span>2</span></a></li>
-							<li><a href="#"><span>3</span></a></li>
-							<li><a href="#"><span>4</span></a></li>
-							<li><a href="#"><span>5</span></a></li>
-							<li><a href="#"><span>Next</span></a></li>
-						</ul>
-					</div></tr>
-				</tfoot>
-				<tbody id ="body">
-
-				
-				</tbody>
-			</table>
-		</div> -->
-		
-
+   	</div>
+   	<input type="button" id="addmorePOIbutton" value="Insert" onclick="insRow()"/>
+   	</br>
 	
-		<!--<button class="btn btn-default"><a href = "/addprogram">Submit</button><br/></a>-->
-
 		
 	
 	
 	  <input type="submit" class="btnLogin" value="Submit" tabindex="1">
 	  
 </form>
-	
-
-</td>
-
-</tr>
-</table>				
