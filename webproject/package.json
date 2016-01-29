@@ -15,6 +15,7 @@
     "ejs": "~0.8.5",
     "express": "~4.13.1",
     "express-session": "~1.0.0",
+    "express3-handlebars": "^0.5.2",
     "handlebars": "^4.0.5",
     "jade": "~1.11.0",
     "kerberos": "0.0.18",
