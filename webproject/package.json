@@ -6,7 +6,7 @@
     "start": "nodemon app.js"
   },
   "dependencies": {
-    "bcrypt-nodejs": "latest",
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "~1.13.2",
     "connect-busboy": "0.0.2",
     "connect-flash": "^0.1.1",
