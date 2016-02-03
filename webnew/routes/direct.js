@@ -34,10 +34,10 @@ module.exports = function(app, passport) {
     // =====================================
     // HOME PAGE (with login links) ========
     // =====================================
-    app.get('/', function(req, res) {
+    //app.get('/', function(req, res) {
     	//res.render('signin.ejs');
-        res.render('signin.hbs',{layout:"main"}); // load the sigin.ejs file
-    });
+    //    res.render('signin.hbs',{layout:"main"}); // load the sigin.ejs file
+    //});
 	
 	// Get path images
 	app.get('/image.png', function (req, res) {
@@ -61,7 +61,7 @@ module.exports = function(app, passport) {
     // LOGIN ===============================
     // =====================================
     // show the login form
-    app.get('/login', function(req, res) {
+    app.get('/', function(req, res) {
 
         // render the page and pass in any flash data if it exists     
         res.render('login.ejs', { message: req.flash('loginMessage') }); 
