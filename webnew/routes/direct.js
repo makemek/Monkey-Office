@@ -34,10 +34,10 @@ module.exports = function(app, passport) {
     // =====================================
     // HOME PAGE (with login links) ========
     // =====================================
-    app.get('/', function(req, res) {
+    //app.get('/', function(req, res) {
     	//res.render('signin.ejs');
-        res.render('signin.hbs',{layout:"main"}); // load the sigin.ejs file
-    });
+    //    res.render('signin.hbs',{layout:"main"}); // load the sigin.ejs file
+    //});
 	
 	// Get path images
 	app.get('/image.png', function (req, res) {
@@ -61,7 +61,7 @@ module.exports = function(app, passport) {
     // LOGIN ===============================
     // =====================================
     // show the login form
-    app.get('/login', function(req, res) {
+    app.get('/', function(req, res) {
 
         // render the page and pass in any flash data if it exists     
         res.render('login.ejs', { message: req.flash('loginMessage') }); 
@@ -1158,13 +1158,13 @@ module.exports = function(app, passport) {
 	//=====================================
 	// Workflow. ==============================
 	// =====================================
-	app.get('/workflow', function(req, res){
-		res.render('wf/index.hbs',{
-			layout:"workflowMain"
-		});
-	});
+	//app.get('/workflow', function(req, res){
+	//	res.render('wf/index.hbs',{
+	//		layout:"workflowMain"
+	//	});
+	//});
 
-	app.get('/execute', function(req, res){
+	app.get('/workflow', function(req, res){
 	TemplateWorkflow.find({}, function(err, result){
 
 		if(err) console.log(err);
