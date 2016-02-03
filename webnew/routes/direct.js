@@ -1158,13 +1158,13 @@ module.exports = function(app, passport) {
 	//=====================================
 	// Workflow. ==============================
 	// =====================================
-	app.get('/workflow', function(req, res){
-		res.render('wf/index.hbs',{
-			layout:"workflowMain"
-		});
-	});
+	//app.get('/workflow', function(req, res){
+	//	res.render('wf/index.hbs',{
+	//		layout:"workflowMain"
+	//	});
+	//});
 
-	app.get('/execute', function(req, res){
+	app.get('/workflow', function(req, res){
 	TemplateWorkflow.find({}, function(err, result){
 
 		if(err) console.log(err);
