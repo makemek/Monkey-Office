@@ -1,3 +1,5 @@
+var rootpath = require('rootpath')();
+
 var express = require('express');
 var path = require('path'); //path 
 var	fs = require('fs'); //file
