@@ -1,22 +1,21 @@
-var docModel = require('./schema/externalFiles/document');
+var schema = require('../schema/externalFiles/document');
+var dmsDb = require('../lib/dmsDb');
 
 module.exports = function() {
+	schema.statics.created = function() {
+		this.status = 2;
+	};
+	schema.statics.inProgress = function() {
+		this.status = 1;
+	};
+	schema.statics.done = function() {
+		this.status = 0;
+	}
+	schema.statics.getStatus = function() {
+		return this.status;
+	};
 
-	docModel.methods.inProgress = inProgress;
-	docModel.methods.created = created;
-	docModel.methods.done = done;
-
-	return docModel;
+	var schemaName = 'document';
+	return dmsDb.model(schemaName, schema);
 }
 
-var created = function() {
-	this.status = 2;
-}
-
-var inProgress = function() {
-	this.status = 1;
-}
-
-var done = function() {
-	this.status = 0;
-}

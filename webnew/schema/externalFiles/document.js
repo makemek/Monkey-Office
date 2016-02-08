@@ -1,9 +1,6 @@
-var dms = require('lib/dmsDb');
+var Schema = require('monnoob').Schema;
 
-var Schema = dms.util.Schema;
-var schemaName = 'Document';
-
-var docSchema = {
+var docSchema = new Schema({
 	type: String,
 	date: Date,
 	name: String,
@@ -12,7 +9,7 @@ var docSchema = {
 	
 	relate2docs: [{
 		type: Schema.Types.ObjectId,
-		ref: schemaName
+		ref: 'document'
 	}],
 
 	includeInWorkflow: [{
@@ -21,7 +18,7 @@ var docSchema = {
 	}],
 
 	filepath: String
-};
+});
 
 
-module.exports = dms.model(schemaName, docSchema);
+module.exports = docSchema;
