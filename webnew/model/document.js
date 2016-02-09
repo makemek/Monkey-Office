@@ -1,21 +1,25 @@
 var schema = require('../schema/externalFiles/document');
-var dmsDb = require('../lib/dmsDb');
 
-module.exports = function() {
-	schema.statics.created = function() {
+module.exports = function(dbConnection) {
+
+	schema.statics.findByAuthor = function(author, resultCallbackFunction) {
+		return this.find({'author': author}, resultCallbackFunction);
+	};
+
+	schema.methods.created = function() {
 		this.status = 2;
 	};
-	schema.statics.inProgress = function() {
+	schema.methods.inProgress = function() {
 		this.status = 1;
 	};
-	schema.statics.done = function() {
+	schema.methods.done = function() {
 		this.status = 0;
 	}
-	schema.statics.getStatus = function() {
+	schema.methods.getStatus = function() {
 		return this.status;
 	};
 
 	var schemaName = 'document';
-	return dmsDb.model(schemaName, schema);
+	return dbConnection.model(schemaName, schema);
 }
 
