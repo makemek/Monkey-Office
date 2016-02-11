@@ -5,6 +5,7 @@ var mongoose = require('mongoose');
 var config = require('test/dbTestConfig');
 var db_test = mongoose.createConnection(config.host, config.database, config.port);
 var Doc = require('model/document')(db_test);
+var User = require('model/user')(db_test);
 
 describe('Test document model', function() {
 
@@ -13,15 +14,25 @@ describe('Test document model', function() {
 
 	var doc1, doc2, doc3, doc4;
 	var document;
+	var userJoe;
 
 	beforeEach(function(done) {
+		userJoe = new User({
+			'local': {
+				'name': 'joe'	
+			}
+		});
+		userJoe.save();
+
 		// add dummy data
 		doc1 = new Doc({
+			'personReceive': userJoe,
 			'author': authorX,
 			'name': 'x_doc1',
 		});
 
 		doc2 = new Doc({
+			'personReceive': userJoe,
 			'author': authorX,
 			'name': 'x_doc2',
 		});
@@ -64,6 +75,23 @@ describe('Test document model', function() {
 
 		it('Should give documents owned by ' + authorY, function(done) {
 			expectAuthorToHaveDoc(authorY, [doc4], done);
+		});
+
+		it('Should find documents that user received from others', function(done) {
+			var query = Doc.findByUser(userJoe);
+			query.exec(function(err, docs) {
+				if(err)
+					throw err;
+
+				expect(docs.length).to.equal(2);
+				for(var n = 0; n < docs.length; ++n) {
+					var docId = docs[n].personResponsible();
+					var samePerson = docId.equals(userJoe._id);
+					expect(samePerson).to.be.true;
+				}
+				
+				done();
+			});
 		});
 	});
 
