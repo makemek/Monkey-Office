@@ -4,9 +4,11 @@ var mongoose = require('mongoose');
 var bcrypt   = require('bcrypt-nodejs');
 
 module.exports = function(databaseConnection) {
+	if(!databaseConnection)
+		databaseConnection = mongoose;
+
 	// define the schema for our user model
 	var userSchema = new mongoose.Schema({
-
 
 		local: {
 	        title: String,

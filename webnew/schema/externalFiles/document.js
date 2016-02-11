@@ -2,7 +2,7 @@ var Schema = require('monnoob').Schema;
 
 var docSchema = new Schema({
 	personReceive: {
-		type:Schema.Types.ObjectId,
+		type: Schema.Types.ObjectId,
 		ref: 'User'
 	},
 
