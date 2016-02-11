@@ -1,7 +1,9 @@
  	// =====================================
     // Setting Model Databases ========
     // =====================================
-var User  = require('../model/user');
+var dmsDb = require('../lib/dmsDb');
+var Doc = require('../model/document')(dmsDb);
+var User  = require('../model/user')(dmsDb);
 var Work  = require('../model/works');
 var Fac   = require('../model/faculty');
 var Subject = require('../model/subject');
@@ -107,10 +109,22 @@ module.exports = function(app, passport) {
     // HOME SECTION =====================
     // =====================================
        app.get('/home', isLoggedIn, function(req, res) {
-		res.render('home.hbs',{
-			layout:"homePage",
-			user : req.user
-		});
+
+       	var query = Doc.findByUser(req.user);
+       	query.exec(function(err, _docs) {
+       		if(err) {
+       			console.log(err);
+       			res.status(500);
+       			return next(err);
+       		}
+
+       		var response = {
+       			layout: 'homepage',
+       			docs: _docs
+       		}
+       		
+			res.render('home.hbs', response);
+       	})
     });
       // =====================================
     // PROFILE SECTION =====================
