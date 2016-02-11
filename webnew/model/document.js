@@ -7,13 +7,13 @@ module.exports = function(dbConnection) {
 	};
 
 	schema.methods.created = function() {
-		this.status = 2;
+		this.status = this.schema.path('status').enumValues[0];
 	};
 	schema.methods.inProgress = function() {
-		this.status = 1;
+		this.status = this.schema.path('status').enumValues[1];
 	};
 	schema.methods.done = function() {
-		this.status = 0;
+		this.status = this.schema.path('status').enumValues[2];
 	}
 	schema.methods.getStatus = function() {
 		return this.status;

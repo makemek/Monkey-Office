@@ -19,25 +19,21 @@ describe('Test document model', function() {
 		doc1 = new Doc({
 			'author': authorX,
 			'name': 'x_doc1',
-			'status': 0
 		});
 
 		doc2 = new Doc({
 			'author': authorX,
 			'name': 'x_doc2',
-			'status': 0
 		});
 
 		doc3 = new Doc({
 			'author': authorX,
 			'name': 'x_doc3',
-			'status': 0
 		});
 
 		doc4 = new Doc({
 			'author': authorY,
 			'name': 'y_doc1',
-			'status': 0
 		});
 
 		doc1.save();
@@ -76,19 +72,19 @@ describe('Test document model', function() {
 
 		it('Should set document\'s status to "created"', function(done) {
 			document.created();
-			expect(document.getStatus()).to.equal(2);
+			expect(document.getStatus()).to.equal('create');
 			done();
 		});
 
 		it('Should set document\'s status to "in progress"', function(done) {
 			document.inProgress();
-			expect(document.getStatus()).to.equal(1);
+			expect(document.getStatus()).to.equal('in progress');
 			done();
 		});
 
 		it('Should set document\'s status to "done"', function(done) {
 			document.done();
-			expect(document.getStatus()).to.equal(0);
+			expect(document.getStatus()).to.equal('done');
 			done();
 		});
 	});

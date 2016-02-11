@@ -8,7 +8,11 @@ var docSchema = new Schema({
 	},
 	name: String,
 	author: String,
-	status: Number,
+	status: {
+		type: String,
+		enum: ['create', 'in progress', 'done'],
+		default: 'create'
+	},
 	
 	relate2docs: [{
 		type: Schema.Types.ObjectId,
