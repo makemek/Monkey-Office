@@ -107,14 +107,10 @@ module.exports = function(app, passport) {
     // HOME SECTION =====================
     // =====================================
        app.get('/home', isLoggedIn, function(req, res) {
-		console.log("Get home");
 		res.render('home.hbs',{
 			layout:"homePage",
 			user : req.user
 		});
-       // res.render('home.ejs', {
-       //      user : req.user // get the user out of session and pass to template
-       //  });
     });
       // =====================================
     // PROFILE SECTION =====================
