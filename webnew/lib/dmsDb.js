@@ -16,7 +16,9 @@ var connect2database = function() {
 		dmsDBConfig.password
 	);
 
-	return dmsDB.open();
+	dmsDB.open();
+
+	return dmsDB;
 }
 
 module.exports = connect2database();
