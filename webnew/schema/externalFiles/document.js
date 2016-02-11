@@ -1,6 +1,11 @@
 var Schema = require('monnoob').Schema;
 
 var docSchema = new Schema({
+	personReceive: {
+		type:Schema.Types.ObjectId,
+		ref: 'User'
+	},
+
 	type: String,
 	date: Date,
 	name: String,
