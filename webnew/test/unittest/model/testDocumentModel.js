@@ -60,13 +60,11 @@ describe('Test document model', function() {
 
 	describe('static methods', function() {
 		it('Should give documents owned by ' + authorX, function(done) {
-			expectAuthorToHaveDoc(authorX, [doc1, doc2, doc3]);
-			done();
+			expectAuthorToHaveDoc(authorX, [doc1, doc2, doc3], done);
 		});
 
 		it('Should give documents owned by ' + authorY, function(done) {
-			expectAuthorToHaveDoc(authorY, [doc4]);
-			done();
+			expectAuthorToHaveDoc(authorY, [doc4], done);
 		});
 	});
 
@@ -93,11 +91,12 @@ describe('Test document model', function() {
 	});
 });
 
-function expectAuthorToHaveDoc(authorName, docs) {
+function expectAuthorToHaveDoc(authorName, docs, done) {
 	Doc.findByAuthor(authorName, function(err, docs) {
 		if(err)
 			throw err;
 		
 		expect(docs.length).to.equal(docs.length);
+		done();
 	});	
 }
