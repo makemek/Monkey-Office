@@ -2,7 +2,10 @@ var Schema = require('monnoob').Schema;
 
 var docSchema = new Schema({
 	type: String,
-	date: Date,
+	dateCreate: {
+		type: Date,
+		default: Date.now
+	},
 	name: String,
 	author: String,
 	status: Number,
