@@ -112,9 +112,6 @@ module.exports = function(app, passport) {
 			layout:"homePage",
 			user : req.user
 		});
-       // res.render('home.ejs', {
-       //      user : req.user // get the user out of session and pass to template
-       //  });
     });
       // =====================================
     // PROFILE SECTION =====================
