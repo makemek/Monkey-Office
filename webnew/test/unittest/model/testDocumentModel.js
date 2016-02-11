@@ -14,7 +14,7 @@ describe('Test document model', function() {
 	var doc1, doc2, doc3, doc4;
 	var document;
 
-	beforeEach(function() {
+	beforeEach(function(done) {
 		// add dummy data
 		doc1 = new Doc({
 			'author': authorX,
@@ -45,16 +45,19 @@ describe('Test document model', function() {
 		doc3.save();
 		doc4.save();
 
-
+		this.timeout(config.dbTimeout);
 		Doc.findByAuthor(authorX, function(err, docs) {
 			document = docs[0];
+			done();
 		});		
 	})
 
-	afterEach(function() {
+	afterEach(function(done) {
+		this.timeout(config.dbTimeout);
 		db_test.db.dropDatabase(function(err, result) {
 			if(err)
 				throw err;
+			done();
 		});
 	});
 

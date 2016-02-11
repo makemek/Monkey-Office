@@ -22,3 +22,6 @@ exports.port = port;
 exports.database = database;
 exports.username = username;
 exports.password = password;
+
+var databaseOperationTimeoutMillisecs = 10 * 1000;
+exports.dbTimeout = databaseOperationTimeoutMillisecs;
