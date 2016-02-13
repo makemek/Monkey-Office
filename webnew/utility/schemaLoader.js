@@ -8,6 +8,7 @@ module.exports = function(database) {
 	database.model('AcademicYear', require('../model/academic_year'));
 	database.model('TeachingSemester', require('../model/teaching_semester'));
 	database.model('TemplateWorkflow', require('../model/TemplateWorkflow'));
+	database.model('Document', require('../model/document'));
 
 	var models = {
 		User: database.model('User'),
@@ -17,7 +18,8 @@ module.exports = function(database) {
 		Subject: database.model('Subject'),
 		AcademicYear: database.model('AcademicYear'),
 		TeachingSemester: database.model('TeachingSemester'),
-		TemplateWorkflow: database.model('TemplateWorkflow')
+		TemplateWorkflow: database.model('TemplateWorkflow'),
+		Document: database.model('Document')
 	}
 
 	return models;

@@ -30,6 +30,7 @@ module.exports = function(app, passport, schemas) {
 	var Acyear = schemas.AcademicYear;
 	var Teach = schemas.TeachingSemester;
 	var TemplateWorkflow 	= schemas.TemplateWorkflow;
+	var Doc = schemas.Document;
 
     // =====================================
     // HOME PAGE (with login links) ========
