@@ -1,33 +1,62 @@
-var schema = require('../schema/externalFiles/document');
+var Schema = require('mongoose').Schema;
 
-module.exports = function(dbConnection) {
+var docSchema = new Schema({
+	personReceive: {
+		type: Schema.Types.ObjectId,
+		ref: 'user'
+	},
 
-	schema.statics.findByUser = function(user) {
-		return this.find({'personReceive': user});
-	};
+	type: String,
+	dateCreate: {
+		type: Date,
+		default: Date.now
+	},
+	name: String,
+	author: String,
+	status: {
+		type: String,
+		enum: ['create', 'in progress', 'done'],
+		default: 'create'
+	},
+	
+	relate2docs: [{
+		type: Schema.Types.ObjectId,
+		ref: 'document'
+	}],
 
-	schema.statics.findByAuthor = function(author, resultCallbackFunction) {
-		return this.find({'author': author}, resultCallbackFunction);
-	};
+	includeInWorkflow: [{
+		type: Schema.Types.ObjectId,
+		ref: 'workflow'
+	}],
 
-	schema.methods.created = function() {
-		this.status = this.schema.path('status').enumValues[0];
-	};
-	schema.methods.inProgress = function() {
-		this.status = this.schema.path('status').enumValues[1];
-	};
-	schema.methods.done = function() {
-		this.status = this.schema.path('status').enumValues[2];
-	}
-	schema.methods.getStatus = function() {
-		return this.status;
-	};
+	filepath: String
+});
 
-	schema.methods.personResponsible = function() {
-		return this.personReceive;
-	}
+docSchema.statics.findByUser = function(user) {
+	return this.find({'personReceive': user});
+};
 
-	var schemaName = 'document';
-	return dbConnection.model(schemaName, schema);
+docSchema.statics.findByAuthor = function(author, resultCallbackFunction) {
+	return this.find({'author': author}, resultCallbackFunction);
+};
+
+docSchema.methods.created = function() {
+	this.status = this.schema.path('status').enumValues[0];
+};
+docSchema.methods.inProgress = function() {
+	this.status = this.schema.path('status').enumValues[1];
+};
+docSchema.methods.done = function() {
+	this.status = this.schema.path('status').enumValues[2];
 }
+docSchema.methods.getStatus = function() {
+	return this.status;
+};
+
+docSchema.methods.personResponsible = function() {
+	return this.personReceive;
+}
+
+module.exports = docSchema;
+
 

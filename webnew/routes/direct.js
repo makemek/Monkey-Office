@@ -1,15 +1,3 @@
- 	// =====================================
-    // Setting Model Databases ========
-    // =====================================
-var dmsDb = require('../lib/dmsDb');
-var Doc = require('../model/document')(dmsDb);
-var User  = require('../model/user')(dmsDb);
-var Work  = require('../model/works');
-var Fac   = require('../model/faculty');
-var Subject = require('../model/subject');
-var Acyear = require('../model/academic_year');
-var Teach = require('../model/teaching_semester');
-var TemplateWorkflow 	= require('../model/TemplateWorkflow');
 //var Handler		= require('./handler');
 var path = require('path');
 var fs = require('fs');
@@ -31,7 +19,17 @@ var index = 0;
 var nametemp = "";
 
 
-module.exports = function(app, passport) {
+module.exports = function(app, passport, schemas) {
+ 	// =====================================
+    // Setting Model Databases ========
+    // =====================================
+	var User  = schemas.User;
+	var Work  = schemas.Work;
+	var Fac   = schemas.Faculty;
+	var Subject = schemas.Subject;
+	var Acyear = schemas.AcademicYear;
+	var Teach = schemas.TeachingSemester;
+	var TemplateWorkflow 	= schemas.TemplateWorkflow;
 
     // =====================================
     // HOME PAGE (with login links) ========

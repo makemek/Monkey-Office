@@ -1,38 +1,41 @@
 var rootpath = require('rootpath')();
 var expect = require('chai').expect;
 
-var mongoose = require('mongoose');
 var config = require('test/dbTestConfig');
+var mongoose = require('mongoose');
 var db_test = mongoose.createConnection(config.host, config.database, config.port);
-var Doc = require('model/document')(db_test);
-var User = require('model/user')(db_test);
+
 
 describe('Test document model', function() {
-
 	var authorX = 'x';
 	var authorY = 'y';
 
+	var User, Doc;
 	var doc1, doc2, doc3, doc4;
 	var document;
 	var userJoe;
 
-	beforeEach(function(done) {
+	before(function(done) {
+		User = db_test.model('user', require('model/user'));
+		Doc = db_test.model('document', require('model/document'));
 		userJoe = new User({
 			'local': {
 				'name': 'joe'	
 			}
 		});
-		userJoe.save();
+		userJoe.save(done);
+	});
 
+	beforeEach(function(done) {
 		// add dummy data
 		doc1 = new Doc({
-			'personReceive': userJoe,
+			'personReceive': userJoe._id,
 			'author': authorX,
 			'name': 'x_doc1',
 		});
 
 		doc2 = new Doc({
-			'personReceive': userJoe,
+			'personReceive': userJoe._id,
 			'author': authorX,
 			'name': 'x_doc2',
 		});
@@ -47,13 +50,14 @@ describe('Test document model', function() {
 			'name': 'y_doc1',
 		});
 
-		doc1.save();
-		doc2.save();
-		doc3.save();
-		doc4.save();
-
+		doc1.save(errorCallback);
+		doc2.save(errorCallback);
+		doc3.save(errorCallback);
+		doc4.save(errorCallback);
 		this.timeout(config.dbTimeout);
 		Doc.findByAuthor(authorX, function(err, docs) {
+			if(err)
+				throw err;
 			document = docs[0];
 			done();
 		});		
@@ -70,11 +74,11 @@ describe('Test document model', function() {
 
 	describe('static methods', function() {
 		it('Should give documents owned by ' + authorX, function(done) {
-			expectAuthorToHaveDoc(authorX, [doc1, doc2, doc3], done);
+			expectAuthorToHaveDoc(Doc.findByAuthor(authorX), [doc1, doc2, doc3], done);
 		});
 
 		it('Should give documents owned by ' + authorY, function(done) {
-			expectAuthorToHaveDoc(authorY, [doc4], done);
+			expectAuthorToHaveDoc(Doc.findByAuthor(authorY), [doc4], done);
 		});
 
 		it('Should find documents that user received from others', function(done) {
@@ -85,8 +89,8 @@ describe('Test document model', function() {
 
 				expect(docs.length).to.equal(2);
 				for(var n = 0; n < docs.length; ++n) {
-					var docId = docs[n].personResponsible();
-					var samePerson = docId.equals(userJoe._id);
+					var personId = docs[n].personResponsible();
+					var samePerson = personId.equals(userJoe._id);
 					expect(samePerson).to.be.true;
 				}
 				
@@ -118,12 +122,17 @@ describe('Test document model', function() {
 	});
 });
 
-function expectAuthorToHaveDoc(authorName, docs, done) {
-	Doc.findByAuthor(authorName, function(err, docs) {
+function expectAuthorToHaveDoc(query, docs, done) {
+	query.exec(function(err, docs) {
 		if(err)
 			throw err;
 		
 		expect(docs.length).to.equal(docs.length);
 		done();
 	});	
+}
+
+var errorCallback = function(err) {
+	if(err)
+		throw err;
 }

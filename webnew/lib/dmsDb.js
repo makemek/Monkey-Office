@@ -4,21 +4,23 @@ Taking advantage of module caching
 */
 
 var dmsDBConfig = require('../config/dbconfig');
-var Connection = require('monnoob').connection;
+var mongoose = require('mongoose');
 
-var connect2database = function() {
-	var dmsDB = new Connection(
+var conn2db = function() {
+
+	var optArgs = {
+		'user': dmsDBConfig.username,
+		'password': dmsDBConfig.password
+	}
+
+	var dmsDB = mongoose.createConnection(
 		dmsDBConfig.host,
 		dmsDBConfig.database,
 		dmsDBConfig.port,
-
-		dmsDBConfig.username,
-		dmsDBConfig.password
+		optArgs
 	);
-
-	dmsDB.open();
-
+	
 	return dmsDB;
 }
 
-module.exports = connect2database();
+module.exports = conn2db();
