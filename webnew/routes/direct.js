@@ -146,11 +146,16 @@ module.exports = function(app, passport, schemas) {
    		where('name').regex(subStringRegex(documentName, false)).
    		where('dateCreate').gt(fromDate).lt(toDate);
 
-   		if(status)
-   			query = query.where('status').equals(subStringRegex(status, false));
-   		if(type)
-   			query = query.where('type').equals(subStringRegex(type, false));
-
+   		if(status) {
+   			status = status.toLowerCase().trim();
+   			query = query.where('status').equals(status);
+   		}
+   			
+   		if(type) {
+   			type = type.toLowerCase().trim();
+   			query = query.where('type').equals(type);
+   		}
+   			
    		query.exec(function(err, _docs) {
        		if(err) {
        			console.log(err);
