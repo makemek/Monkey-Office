@@ -125,6 +125,47 @@ module.exports = function(app, passport, schemas) {
 			res.render('home.hbs', response);
        	})
     });
+
+       app.post('/home', isLoggedIn, function(req, res) {
+
+   		var documentName = req.body.docName;
+   		var status = req.body.status;
+   		var fromDate = new Date(req.body.fromDate);
+   		var toDate = new Date(req.body.toDate);
+   		var type = req.body.type;
+   		var user = req.user;
+
+   		var subStringRegex = function(subString, isCaseSensitive) {
+   			var mode;
+   			if(isCaseSensitive) mode = 'c';
+   			else mode = 'i';
+
+   			return new RegExp(subString, mode);
+   		};
+   		var query = Doc.findByUser(user).
+   		where('name').regex(subStringRegex(documentName, false)).
+   		where('dateCreate').gt(fromDate).lt(toDate);
+
+   		if(status)
+   			query = query.where('status').equals(subStringRegex(status, false));
+   		if(type)
+   			query = query.where('type').equals(subStringRegex(type, false));
+
+   		query.exec(function(err, _docs) {
+       		if(err) {
+       			console.log(err);
+       			res.status(500);
+       			return next(err);
+   			}
+   			console.log(_docs);
+			var response = {
+       			layout: 'homepage',
+       			docs: _docs
+   			}
+   		
+			res.render('home.hbs', response); 
+   		});
+   });
       // =====================================
     // PROFILE SECTION =====================
     // =====================================
