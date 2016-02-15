@@ -1,13 +1,3 @@
- 	// =====================================
-    // Setting Model Databases ========
-    // =====================================
-var User  = require('../model/user');
-var Work  = require('../model/works');
-var Fac   = require('../model/faculty');
-var Subject = require('../model/subject');
-var Acyear = require('../model/academic_year');
-var Teach = require('../model/teaching_semester');
-var TemplateWorkflow 	= require('../model/TemplateWorkflow');
 //var Handler		= require('./handler');
 var path = require('path');
 var fs = require('fs');
@@ -29,7 +19,20 @@ var index = 0;
 var nametemp = "";
 
 
-module.exports = function(app, passport) {
+module.exports = function(app, passport, schemas) {
+ 	// =====================================
+    // Setting Model Databases ========
+    // =====================================
+	var User  = schemas.User;
+	var Work  = schemas.Work;
+
+	var Fac   = schemas.Faculty;
+	var Subject = schemas.Subject;
+	var Acyear = schemas.AcademicYear;
+	var Teach = schemas.TeachingSemester;
+	var TemplateWorkflow 	= schemas.TemplateWorkflow;
+	var Doc = schemas.Document;
+
 
     // =====================================
     // HOME PAGE (with login links) ========
@@ -107,15 +110,125 @@ module.exports = function(app, passport) {
     // HOME SECTION =====================
     // =====================================
        app.get('/home', isLoggedIn, function(req, res) {
-		console.log("Get home");
-		res.render('home.hbs',{
-			layout:"homePage",
-			user : req.user
-		});
-       // res.render('home.ejs', {
-       //      user : req.user // get the user out of session and pass to template
-       //  });
+       	var doc1 = new Doc({
+       		personReceive: req.user,
+       		type: 'doc',
+       		name: 'mydoc1',
+       		author: 'X',
+       		filepath: path.resolve('uploads/document/mydoc1.docx')
+       	});
+       	var doc2 = new Doc({
+       		personReceive: req.user,
+       		type: 'doc',
+       		name: 'mydoc2',
+       		author: 'Y',
+       		filepath: path.resolve('uploads/document/mydoc2.docx')
+       	});
+
+       	// doc1.save();
+       	// doc2.save();
+
+       	var doclist = [doc1,doc2];
+
+       	// console.log('all doc: '+doclist);
+
+       	// var data_doc1 = JSON.stringify(doc1);
+
+       	// console.log("DOC1:"+data_doc1);
+       	// console.log("KEY in DOC1:"+doc1.author);
+       	// console.log("Doclist in DOC1:"+doclist[0].author);
+
+
+       	var query = Doc.findByUser(req.user);
+       	query.exec(function(err, _docs) {
+       		if(err) {
+       			console.log(err);
+       			res.status(500);
+       			return next(err);
+       		}
+       		
+       		console.log(_docs);
+
+       		var response = {
+       			layout: 'homepage',
+       			//docs: _docs
+       			docs: doclist
+       		}
+       		console.log(response);
+			res.render('home.hbs', response);
+       	});
+
+ 	
+
+	
     });
+
+       app.post('/home', isLoggedIn, function(req, res) {
+       	console.log('AT HOME');
+   		var documentName = req.body.doc_name;
+   		var status = req.body.doc_status;
+   		var fromDate = Date.parse(req.body.fromDate);
+   		var toDate = Date.parse(req.body.toDate);
+   		var type = req.body.doc_type;
+   		var author = req.body.doc_author;
+   		var user = req.user;
+   		console.log(documentName);
+   		console.log(status);
+   		console.log(fromDate);
+   		console.log(toDate);
+   		console.log(type);
+   		console.log(author);
+
+
+   		var subStringRegex = function(subString, isCaseSensitive) {
+   			var mode;
+   			if(isCaseSensitive) mode = 'c';
+   			else mode = 'i';
+
+   			return new RegExp(subString, mode);
+   		};
+   		
+   		var query = Doc.findByUser(user).
+   		where('name').regex(subStringRegex(documentName, false));
+
+   		if(!isNaN(fromDate) && !isNaN(toDate)) {
+   			fromDate = new Date(fromDate);
+   			toDate = new Date(toDate);
+   			query = query.where('dateCreate').gt(fromDate).lt(toDate);
+   		}
+
+   		if(author) {
+   			query = query.where('author').regex(subStringRegex(author, false));
+   		}
+
+   		if(status !== 'all') {
+   			status = status.toLowerCase().trim();
+   			query = query.where('status').equals(status);
+   		}
+   				
+   		// if(type) {
+   		// 	type = type.toLowerCase().trim();
+   		// 	query = query.where('type').equals(type);
+   		// }
+
+
+   		console.log("FIND DOC:"+query);
+
+   		query.exec(function(err, _docs) {
+       		if(err) {
+       			console.log(err);
+       			res.status(500);
+       			return next(err);
+   			}
+   			console.log(_docs);
+			var response = {
+       			layout: 'homepage',
+       			docs: _docs
+   			}
+   		
+			res.render('home.hbs', response); 
+   		});
+   });
       // =====================================
     // PROFILE SECTION =====================
     // =====================================
@@ -1245,6 +1358,30 @@ module.exports = function(app, passport) {
 		res.end("DONE");
 
 	});
+
+	//=====================================
+	// DMs. ==============================
+	// =====================================
+
+
+
+
+	app.post('/getdoc',function(req,res){
+		console.log('Post Document');
+		var doc_name = req.body.doc_name;
+		var doc_author = req.body.doc_author;
+		var doc_status = req.body.doc_status;
+		console.log(JSON.stringify(req.body));
+		// console.log("test date ",req.body['fromDate']);
+		console.log("test status ",req.body['doc_status']);
+		console.log("test get date",req.body['toDate']);
+		console.log('req.body.doc_name', req.body['doc_name']);
+		res.render('dms/getdoc.hbs',{
+				layout: "homePage"
+			});
+	});
+
+	
 
 };
 
