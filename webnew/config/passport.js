@@ -3,11 +3,12 @@
 // load all the things we need
 var LocalStrategy   = require('passport-local').Strategy;
 
-// expose this function to our app using module.exports
-module.exports = function(passport, schemas) {
+// load up the user model
+var User            = require('../model/user');
+var Work            = require('../model/works');
 
-    var User = schemas.User;
-    var Work = schemas.Work;
+// expose this function to our app using module.exports
+module.exports = function(passport) {
 
     // =========================================================================
     // passport session setup ==================================================
