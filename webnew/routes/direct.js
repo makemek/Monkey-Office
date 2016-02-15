@@ -128,12 +128,21 @@ module.exports = function(app, passport, schemas) {
 
        app.post('/home', isLoggedIn, function(req, res) {
 
-   		var documentName = req.body.docName;
-   		var status = req.body.status;
-   		var fromDate = new Date(req.body.fromDate);
-   		var toDate = new Date(req.body.toDate);
-   		var type = req.body.type;
+       	console.log('AT HOME');
+   		var documentName = req.body.doc_name;
+   		var status = req.body.doc_status;
+   		var fromDate = Date.parse(req.body.fromDate);
+   		var toDate = Date.parse(req.body.toDate);
+   		var type = req.body.doc_type;
+   		var author = req.body.doc_author;
    		var user = req.user;
+   		console.log(documentName);
+   		console.log(status);
+   		console.log(fromDate);
+   		console.log(toDate);
+   		console.log(type);
+   		console.log(author);
+
 
    		var subStringRegex = function(subString, isCaseSensitive) {
    			var mode;
@@ -142,20 +151,25 @@ module.exports = function(app, passport, schemas) {
 
    			return new RegExp(subString, mode);
    		};
+   		
    		var query = Doc.findByUser(user).
-   		where('name').regex(subStringRegex(documentName, false)).
-   		where('dateCreate').gt(fromDate).lt(toDate);
+   		where('name').regex(subStringRegex(documentName, false));
 
-   		if(status) {
+   		if(!isNaN(fromDate) && !isNaN(toDate)) {
+   			fromDate = new Date(fromDate);
+   			toDate = new Date(toDate);
+   			query = query.where('dateCreate').gt(fromDate).lt(toDate);
+   		}
+
+   		if(author) {
+   			query = query.where('author').regex(subStringRegex(author, false));
+   		}
+
+   		if(status !== 'all') {
    			status = status.toLowerCase().trim();
    			query = query.where('status').equals(status);
    		}
-   			
-   		if(type) {
-   			type = type.toLowerCase().trim();
-   			query = query.where('type').equals(type);
-   		}
-   			
+   				
    		query.exec(function(err, _docs) {
        		if(err) {
        			console.log(err);
@@ -170,6 +184,7 @@ module.exports = function(app, passport, schemas) {
    		
 			res.render('home.hbs', response); 
    		});
+
    });
       // =====================================
     // PROFILE SECTION =====================
