@@ -15,7 +15,7 @@ var docSchema = new Schema({
 	author: String,
 	status: {
 		type: String,
-		enum: ['create', 'in progress', 'done'],
+		enum: ['create', 'inprogress', 'done'],
 		default: 'create'
 	},
 	
@@ -48,14 +48,15 @@ docSchema.methods.inProgress = function() {
 };
 docSchema.methods.done = function() {
 	this.status = this.schema.path('status').enumValues[2];
-}
+};
+
 docSchema.methods.getStatus = function() {
 	return this.status;
 };
 
 docSchema.methods.personResponsible = function() {
 	return this.personReceive;
-}
+};
 
 module.exports = docSchema;
 

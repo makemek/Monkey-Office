@@ -3,6 +3,7 @@ module.exports = function(database) {
 	database.model('User', require('../model/user'));
 	database.model('Work', require('../model/works'));
 	database.model('Document', require('../model/document'));
+
 	database.model('Faculty', require('../model/faculty'));
 	database.model('Subject', require('../model/subject'));
 	database.model('AcademicYear', require('../model/academic_year'));
@@ -19,7 +20,6 @@ module.exports = function(database) {
 		AcademicYear: database.model('AcademicYear'),
 		TeachingSemester: database.model('TeachingSemester'),
 		TemplateWorkflow: database.model('TemplateWorkflow'),
-		Document: database.model('Document')
 	}
 
 	return models;

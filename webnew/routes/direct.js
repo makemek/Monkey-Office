@@ -32,6 +32,7 @@ module.exports = function(app, passport, schemas) {
 	var TemplateWorkflow 	= schemas.TemplateWorkflow;
 	var Doc = schemas.Document;
 
+
     // =====================================
     // HOME PAGE (with login links) ========
     // =====================================
@@ -1315,6 +1316,30 @@ module.exports = function(app, passport, schemas) {
 		res.end("DONE");
 
 	});
+
+	//=====================================
+	// DMs. ==============================
+	// =====================================
+
+
+
+
+	app.post('/getdoc',function(req,res){
+		console.log('Post Document');
+		var doc_name = req.body.doc_name;
+		var doc_author = req.body.doc_author;
+		var doc_status = req.body.doc_status;
+		console.log(JSON.stringify(req.body));
+		// console.log("test date ",req.body['fromDate']);
+		console.log("test status ",req.body['doc_status']);
+		console.log("test get date",req.body['toDate']);
+		console.log('req.body.doc_name', req.body['doc_name']);
+		res.render('dms/getdoc.hbs',{
+				layout: "homePage"
+			});
+	});
+
+	
 
 };
 
